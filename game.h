@@ -4,6 +4,8 @@
 #include <list>
 #include <QPainter>
 
+
+
 class Object;
 typedef std::list<Object*> ObjList;
 
@@ -41,5 +43,6 @@ class Game
         void Show(QPainter& p);
         void keyPressed(int key);
 };
+
 
 #endif

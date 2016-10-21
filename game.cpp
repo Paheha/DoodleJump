@@ -1,10 +1,14 @@
 #include <game.h>
 #include <cmath>
 #include <cstdlib>
-#include <typeinfo> // Для std::bad_cast
-#include <iostream> // Для std::cerr и др.
+#include <typeinfo> // ��� std::bad_cast
+#include <iostream> // ��� std::cerr � ��.
 #include <QImage>
+#include <QKeyEvent>
 #include <iostream>
+using namespace std;
+double Doodler_dx = 0;
+double Doodler_dy = 0;
 
 double Object::distance(const Object& other) const
 {
@@ -13,18 +17,6 @@ double Object::distance(const Object& other) const
     return sqrt(dx*dx + dy*dy);
 }
 
-/*
-Object* Object::collide_plank(ObjList& objects) const
-{
-    for(ObjList::const_iterator it = objects.begin(); it != objects.end(); ++it)
-    {
-        if(*it == this) continue;
-    if(**it.y < (size+(*it)->size))
-            return *it;
-    }
-    return 0;
-}
-*/
 Object* Object::collides(ObjList& objects) const
 {
     for(ObjList::const_iterator it = objects.begin(); it != objects.end(); ++it)
@@ -56,7 +48,6 @@ void Game::Show(QPainter& p)
 
 class Slonopotam : public Object
 {
-    int id = 5;
     double dx,dy;
     double x_new, y_new;
     static QImage sprite;
@@ -109,11 +100,10 @@ class Slonopotam : public Object
     }
 };
 
-QImage Slonopotam::sprite("C:/Users/Gimarr/Documents/Doodle/slonopotam.png");
+QImage Slonopotam::sprite("C:/Users/Gimarr/Documents/DoodleMain/slonopotam.png");
 
 class Kaban : public Object
 {
-    int id = 6;
     double dx,dy;
     double x_new, y_new;
     static QImage sprite;
@@ -183,7 +173,7 @@ class Kaban : public Object
 
 };
 
-QImage Kaban::sprite("C:/Users/Gimarr/Documents/Doodle/kaban.png");
+QImage Kaban::sprite("C:/Users/Gimarr/Documents/DoodleMain/kaban.png");
 
 class Plank_Green : public Object
 {
@@ -225,7 +215,7 @@ class Plank_Green : public Object
     }
 };
 
-QImage Plank_Green::sprite("C:/Users/Gimarr/Documents/Doodle/Planks/normal.png");
+QImage Plank_Green::sprite("C:/Users/Gimarr/Documents/DoodleMain/Planks/normal.png");
 
 class Plank_Blue : public Object
 {
@@ -236,52 +226,13 @@ class Plank_Blue : public Object
     Plank_Blue(int Y)
     {
         id = 2;
-        y = Y;
+        y = 100;
         x = 400;//rand()% 700 + 50;
-        dx = 0;//rand() % 20 - 10 ;
-        dy = 2;
+        dy = 0;
+        dx = 5;
 
     }
 
-
-    void Show(QPainter& p)
-    {
-        p.save();
-
-        p.translate(x,y);
-        p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
-
-        p.restore();
-    }
-
-    void Next(ObjList& objects, double dt)
-    {
-        if (( y > 700 )&&(dy > 0)) { dy = -dy; }
-        if (( y < 100 )&&(dy < 0)) { dy = -dy; }
-        x_new = x+dx;
-        y_new = y+dy;
-
-    }
-
-    void Commit(ObjList& objects)
-    {
-        x = x_new; y = y_new;
-    }
-};
-
-QImage Plank_Blue::sprite("C:/Users/Gimarr/Documents/Doodle/Planks/blue.png");
-
-class Doodler : public Object
-{
-
-    double dx,dy, ddx, ddy;
-    double x_new, y_new, dx_new, dy_new;
-    static QImage sprite;
-    public:
-    Doodler(): dx(0), dy(0)
-    {
-        x = 400; y = 300; ddx = 0, ddy=0.06; size = 80;
-    }
 
     void Show(QPainter& p)
     {
@@ -297,19 +248,81 @@ class Doodler : public Object
     {
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
+        x_new = x+dx;
+        dy = dy + 0.06;
+        y_new =400 +  50* sin(dy);
+
+    }
+
+    void Commit(ObjList& objects)
+    {
+        x = x_new; y = y_new;
+    }
+};
+
+QImage Plank_Blue::sprite("C:/Users/Gimarr/Documents/DoodleMain/Planks/blue.png");
+
+class Doodler : public Object
+{
+
+    double dx,dy, ddx, ddy;
+    double x_new, y_new, dx_new, dy_new;
+    static QImage sprite;
+    public:
+    Doodler(): dx(0), dy(0)
+    {
+        x = 400; y = 300; ddx = 0, ddy = 0.06; size = 80;
+    }
+
+    void Show(QPainter& p)
+    {
+        p.save();
+
+        p.translate(x,y);
+        p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
+
+        p.restore();
+    }
+
+    void do_command(int key)
+        {
+            std::cout << "Do_command: " << key << std::endl;
+            switch(key)
+            {
+               case Qt::Key_A:
+                       dx = -5;
+                       std::cout << "Going left" << std::endl;
+                       break;
+               case Qt::Key_D:
+                       dx =  5;
+                       std::cout << "Going right" << std::endl;
+                       break;
+               case Qt::Key_Space:
+                       dx = 0; dy = 0;
+                       std::cout << "Stopping" << std::endl;
+                       break;
+                }
+           }
+
+    void Next(ObjList& objects, double dt)
+    {
+        if (( x >= 750 )&&(dx > 0)) x = 51;
+        if (( x <= 50 )&&(dx < 0)) x = 749;
         if ( y > 750 ) y = 51;
+
         if (collides(objects)) {
 
-            std::cout << collides(objects)->id << std::endl;//  Зеленая планка
+            std::cout << collides(objects)->id << std::endl;
 
             switch((collides(objects))->id)
             {
             case 1:
             {
+
                 std::cout << collides(objects)->id << std::endl;
                 if (dy > 0)
                 {
-                    dy = -dy;
+                    dy = -6;
                     std::cout << "Jump" << std::endl;
                 }
                 std::cout << "Green Plank" << std::endl;
@@ -320,7 +333,7 @@ class Doodler : public Object
                 std::cout << collides(objects)->id << std::endl;
                 if (dy > 0)
                 {
-                    dy = -dy;
+                    dy = -6;
                     std::cout << "Jump" << std::endl;
                 }
                 std::cout << "Blue Plank" << std::endl;
@@ -340,13 +353,10 @@ class Doodler : public Object
         x = x_new; y = y_new;
     }
 
-
 };
 
-QImage Doodler::sprite("C:/Users/Gimarr/Documents/Doodle/doodler.png");
+QImage Doodler::sprite("C:/Users/Gimarr/Documents/DoodleMain/doodler.png");
 //=========
-
-
 
 void Game::keyPressed(int key)
 {
@@ -356,9 +366,9 @@ void Game::keyPressed(int key)
 
 Game::Game(): kaban_ptr(0)
 {
-    objects.push_back(new Slonopotam(100,400));
-    kaban_ptr = new Kaban(400,400);
-    objects.push_back(kaban_ptr);
+    //objects.push_back(new Slonopotam(100,400));
+    //kaban_ptr = new Kaban(400,400);
+    //objects.push_back(kaban_ptr);
     objects.push_back(new Plank_Green(600));
     objects.push_back(new Plank_Blue(200));
     objects.push_back(new Doodler);
