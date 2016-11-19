@@ -7,7 +7,7 @@
 QT       += core gui
 
 QT += widgets
-
+CONFIG += console
 TARGET = Doodle
 TEMPLATE = app
 
@@ -20,3 +20,5 @@ HEADERS  += mainwindow.h \
     game.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES +=

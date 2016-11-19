@@ -4,7 +4,8 @@
 #include <QWidget>
 #include <QPainter>
 #include <QKeyEvent>
-
+#include <iostream>
+using namespace std;
 class GameView : public QWidget
 {
         Game the_game;
@@ -17,19 +18,25 @@ class GameView : public QWidget
         void timerEvent(QTimerEvent*);
         void paintEvent(QPaintEvent*);
         void keyPressEvent(QKeyEvent*);
+        //void doodler_jump(QPaintEvent*,Game the_game);
 };
 
 void GameView::timerEvent(QTimerEvent*)
 {
-        the_game.Next(50);
+        the_game.Next(10);
         update();
 }
 
 void GameView::paintEvent(QPaintEvent*)
 {
         QPainter p(this);
-  the_game.Show(p);
+        p.drawLine(0,200,800,200);
+        p.drawLine(0,550,800,550);
+        p.drawText( QPoint(400,400), "Why the Doodler is always in contact with the Blue/Green plank?" );
+        the_game.Show(p);
 }
+
+
 
 void GameView::keyPressEvent(QKeyEvent* e)
 {
@@ -38,6 +45,7 @@ void GameView::keyPressEvent(QKeyEvent* e)
 
 int main(int ac, char* av[])
 {
+        setlocale( LC_ALL,"Russian" );
         QApplication a(ac,av);
 
         GameView gv; gv.show();
