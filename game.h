@@ -52,6 +52,7 @@ class Game
         void Next(double dt);
         void Show(QPainter& p);
         void keyPressed(int key);
+        void keyReleased(int key);
 };
 
 

@@ -1,7 +1,6 @@
 #include <game.h>
 #include <cmath>
 #include <cstdlib>
-#include <typeinfo> // ƒл€ std::bad_cast
 #include <iostream> // ƒл€ std::cerr и др.
 #include <QImage>
 #include <QBitmap>
@@ -65,7 +64,6 @@ Object* Object::collides(ObjSet& objects) const
 
 void Game::Next(double dt)
 {
-
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
         (*it)->Next(objects, dt);
 
@@ -186,11 +184,13 @@ QImage Plank_Blue::sprite(":/images/planks/blue.png");
 
 class Doodler : public Object
 {
-
     double ddx, ddy;
     double x_new, y_new, dx_new, dy_new;
     QPixmap sprite;
+
     public:
+
+    bool KEY_A_PRESSED,KEY_D_PRESSED, KEY_SPACE_PRESSED;
     double y_fake, dy_fake;
     enum {Type = 1};
     virtual int type() const {return Type;}
@@ -198,7 +198,7 @@ class Doodler : public Object
     Doodler(): dx(0), dy(0), sprite(":/images/doodler.png")
     {
        sprite.setMask(sprite.createHeuristicMask());
-       x = 400; y = 300; ddx = 0.1, ddy = 0.06; size = 80;
+       x = 400; y = 300; ddx = 0.4, ddy = 0.06; size = 80;
        dy_fake = 0;
        y_fake = y;
        size_x = sprite.width()/2;
@@ -218,24 +218,8 @@ class Doodler : public Object
     }
 
     void do_command(int key)
-        {
-            std::cout << "Do_command: " << key << std::endl;
-            switch(key)
-            {
-               case Qt::Key_A:
-                       dx = -6;
-                       std::cout << "Going left" << std::endl;
-                       break;
-               case Qt::Key_D:
-                       dx =  6;
-                       std::cout << "Going right" << std::endl;
-                       break;
-               case Qt::Key_Space:
-                       x = 400; y =400;
-                       std::cout << "Stopping" << std::endl;
-                       break;
-                }
-           }
+    {
+    }
 
     void Next(ObjSet& objects, double dt)
     {
@@ -273,12 +257,24 @@ class Doodler : public Object
 
         if (dx > 0 ) { dx = dx - ddx ;}
         if (dx < 0 ) { dx = dx + ddx ;}
-        if (abs(dx)<0.07) dx = 0;
+        if (abs(dx)<0.4) dx = 0;
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
         //if (( y < 50 )&&(dy < 0)) y = 749;
         if (( y >= 750 )&&(dy > 0)) y = 400;
 
+        if (KEY_A_PRESSED) {
+               dx = -6;
+               std::cout << "Going left" << std::endl;
+        }
+        if (KEY_D_PRESSED) {
+            dx =  6;
+            std::cout << "Going right" << std::endl;
+        }
+        if (KEY_SPACE_PRESSED) {
+            x = 400; y = 400;
+            std::cout << "Stopping" << std::endl;
+        }
 
         if ( y_fake < 200 ) {
             dy = dy_fake;
@@ -295,10 +291,9 @@ class Doodler : public Object
             //cout<<" y_f= "<<y_fake<<" y= "<<y<<endl;
             y_new = y + dy;
         }
-
         dy = dy + ddy;
-
         x_new = x+dx;
+
     }
 
     void Commit(ObjSet& objects)
@@ -308,15 +303,44 @@ class Doodler : public Object
 
 };
 
-//QPixmap Doodler::sprite(":/images/doodler.png");
 //=========
 
 void Game::keyPressed(int key)
 {
-    if(Doodler_ptr) Doodler_ptr->do_command(key);
+    if(Doodler_ptr) {
+        switch(key)
+        {
+            case Qt::Key_A:
+                Doodler_ptr->KEY_A_PRESSED = true;
+                break;
+            case Qt::Key_D:
+                Doodler_ptr->KEY_D_PRESSED = true;
+                break;
+            case Qt::Key_Space:
+                Doodler_ptr->KEY_SPACE_PRESSED = true;
+                break;
 
+        }
+    }
 }
+void Game::keyReleased(int key)
+{
+    if(Doodler_ptr) {
+        switch(key)
+        {
+            case Qt::Key_A:
+                Doodler_ptr->KEY_A_PRESSED = false;
+                break;
+            case Qt::Key_D:
+                Doodler_ptr->KEY_D_PRESSED = false;
+                break;
+            case Qt::Key_Space:
+                Doodler_ptr->KEY_SPACE_PRESSED = false;
+                break;
 
+        }
+    }
+}
 
 Game::Game()
 {

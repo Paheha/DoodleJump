@@ -20,6 +20,18 @@ class GameView : public QWidget
         void timerEvent(QTimerEvent*);
         void paintEvent(QPaintEvent*);
         void keyPressEvent(QKeyEvent*);
+        void keyReleaseEvent(QKeyEvent*);
+      /*  bool event(QEvent *event){
+            if (event->type() == QEvent::KeyPress) {
+                QKeyEvent *keyEvent = (QKeyEvent *)event;
+                cout<< "EVENT : "<<keyEvent->key()<<endl;
+            }
+            if (event->type() == QEvent::KeyRelease) {
+                QKeyEvent *keyEvent = (QKeyEvent *)event;
+                cout<< "EVENT : "<<keyEvent->key()<<endl;
+            }
+           return QWidget::event(event);
+        }*/
         //void doodler_jump(QPaintEvent*,Game the_game);
 };
 
@@ -38,10 +50,13 @@ void GameView::paintEvent(QPaintEvent*)
 }
 
 
-
 void GameView::keyPressEvent(QKeyEvent* e)
 {
   the_game.keyPressed(e->key());
+}
+void GameView::keyReleaseEvent(QKeyEvent* e)
+{
+  the_game.keyReleased(e->key());
 }
 
 int main(int ac, char* av[])
@@ -50,7 +65,12 @@ int main(int ac, char* av[])
         QApplication a(ac,av);
         QResource::registerResource("myresource.rcc");
         GameView gv; gv.show();
-
+       /* QBrush br(Qt::TexturePattern);
+            br.setTextureImage(QImage(":/images/backgr.png"));
+            QPalette plt = gv.palette();
+            plt.setBrush(QPalette::Background, br);
+            gv.setPalette(plt);
+            gv.show(); */
         QObject::connect(
                         &a,SIGNAL(lastWindowClosed()),
                         &a,SLOT(quit()));
