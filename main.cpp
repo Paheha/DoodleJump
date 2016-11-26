@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <game.h>
-
+#include <QResource>
+#include <QDir>
+#include <QFile>
 #include <QWidget>
 #include <QPainter>
 #include <QKeyEvent>
@@ -32,7 +34,6 @@ void GameView::paintEvent(QPaintEvent*)
         QPainter p(this);
         p.drawLine(0,200,800,200);
         p.drawLine(0,550,800,550);
-        p.drawText( QPoint(400,400), "Why the Doodler is always in contact with the Blue/Green plank?" );
         the_game.Show(p);
 }
 
@@ -47,7 +48,7 @@ int main(int ac, char* av[])
 {
         setlocale( LC_ALL,"Russian" );
         QApplication a(ac,av);
-
+        QResource::registerResource("myresource.rcc");
         GameView gv; gv.show();
 
         QObject::connect(

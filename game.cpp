@@ -4,9 +4,12 @@
 #include <typeinfo> // ƒл€ std::bad_cast
 #include <iostream> // ƒл€ std::cerr и др.
 #include <QImage>
-#include <QDir>
+#include <QBitmap>
+#include <QPixmap>
 #include <QKeyEvent>
 #include <iostream>
+#include <sstream>
+#include <string>
 using namespace std;
 
 double Line = 200;
@@ -130,7 +133,7 @@ class Plank_Green : public Object
 };
 
 
-QImage Plank_Green::sprite("C:/Users/Gimarr/Documents/Doodle/Planks/normal.png");
+QImage Plank_Green::sprite(":/images/planks/normal.png");
 
 class Plank_Blue : public Object
 {
@@ -179,20 +182,22 @@ class Plank_Blue : public Object
     }
 };
 
-QImage Plank_Blue::sprite("C:/Users/Gimarr/Documents/Doodle/Planks/blue.png");
+QImage Plank_Blue::sprite(":/images/planks/blue.png");
 
 class Doodler : public Object
 {
+
     double ddx, ddy;
     double x_new, y_new, dx_new, dy_new;
-    static QImage sprite;
+    QPixmap sprite;
     public:
     double y_fake, dy_fake;
     enum {Type = 1};
     virtual int type() const {return Type;}
     double dx,dy;
-    Doodler(): dx(0), dy(0)
+    Doodler(): dx(0), dy(0), sprite(":/images/doodler.png")
     {
+       sprite.setMask(sprite.createHeuristicMask());
        x = 400; y = 300; ddx = 0.1, ddy = 0.06; size = 80;
        dy_fake = 0;
        y_fake = y;
@@ -205,10 +210,10 @@ class Doodler : public Object
     void Show(QPainter& p)
     {
         p.save();
-
         p.translate(x,y);
-        p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
-
+        p.drawPixmap(-sprite.width()/2,-sprite.height()/2,sprite);
+        p.drawText( QPoint(40,-40), "x = " + QString::number(x));
+        p.drawText( QPoint(40,-30), "y = " + QString::number(y));
         p.restore();
     }
 
@@ -242,7 +247,7 @@ class Doodler : public Object
             {
             case 1:
             {
-
+                cout<< rand()<<endl;
                 //std::cout << collides(objects)->id << std::endl;
                 if (dy > 0)
                 {
@@ -303,7 +308,7 @@ class Doodler : public Object
 
 };
 
-QImage Doodler::sprite("C:/Users/Gimarr/Documents/Doodle/doodler.png");
+//QPixmap Doodler::sprite(":/images/doodler.png");
 //=========
 
 void Game::keyPressed(int key)
@@ -318,15 +323,14 @@ Game::Game()
     Doodler_ptr = new Doodler;
     objects.insert(Doodler_ptr);
     objects.insert(new Plank_Green(150,700));
+    objects.insert(new Plank_Blue(150));
     objects.insert(new Plank_Green(400,400));
-
-
 }
 
 void Game::Show(QPainter& p)
 {
+
     bool translatePlanks = false;
-    double dood_dy;
     double delta = 0;
     if((Doodler_ptr)->y <= Line ) {
         //const Doodler* doodler = static_cast<const Doodler*>(*it);
@@ -345,5 +349,15 @@ void Game::Show(QPainter& p)
 
         (*it)->Show(p);
     }
+
+    for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it) {
+        int Greens = 0;
+        int Blues = 0;
+        if ((*it)->type() == Plank_Green::Type) {Greens++;}
+        if ((*it)->type() == Plank_Blue::Type) {Blues++;}
+        //cout<<"Greens : "<<Greens<<endl;
+        //cout<<"Blues : "<<Blues<<endl;
+    }
+
 
 }

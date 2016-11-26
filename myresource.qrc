@@ -1,0 +1,9 @@
+ <!DOCTYPE RCC>
+ <RCC version="1.0">
+ <qresource>
+     <file>images/planks/blue.png</file>
+     <file>images/planks/normal.png</file>
+     <file>images/doodler.png</file>
+
+ </qresource>
+ </RCC>
