@@ -14,25 +14,13 @@ class GameView : public QWidget
         public:
         GameView():QWidget(0)
         {
-                setFixedSize(800,800);
+                setFixedSize(800,1200);
                 startTimer(10);
         }
         void timerEvent(QTimerEvent*);
         void paintEvent(QPaintEvent*);
         void keyPressEvent(QKeyEvent*);
         void keyReleaseEvent(QKeyEvent*);
-      /*  bool event(QEvent *event){
-            if (event->type() == QEvent::KeyPress) {
-                QKeyEvent *keyEvent = (QKeyEvent *)event;
-                cout<< "EVENT : "<<keyEvent->key()<<endl;
-            }
-            if (event->type() == QEvent::KeyRelease) {
-                QKeyEvent *keyEvent = (QKeyEvent *)event;
-                cout<< "EVENT : "<<keyEvent->key()<<endl;
-            }
-           return QWidget::event(event);
-        }*/
-        //void doodler_jump(QPaintEvent*,Game the_game);
 };
 
 void GameView::timerEvent(QTimerEvent*)
@@ -44,8 +32,10 @@ void GameView::timerEvent(QTimerEvent*)
 void GameView::paintEvent(QPaintEvent*)
 {
         QPainter p(this);
-        p.drawLine(0,200,800,200);
-        p.drawLine(0,550,800,550);
+        for (int i = 0; i<= 1200; i+=100) {
+            p.drawText( QPoint(10,i+10),QString::number(i));
+            p.drawLine(0,i,800,i);
+        }
         the_game.Show(p);
 }
 

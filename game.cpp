@@ -118,8 +118,11 @@ class Plank_Green : public Object
     void Next(ObjSet& objects, double dt)
     {
 
-       // if (( x >= 750 )&&(dx > 0)) x = 51;
-       // if (( x <= 50 )&&(dx < 0)) x = 749;
+        if ( y >= 1100 ) {
+            y = 200 ;
+            x = rand()%600 + 100;
+            Starting_Y = 200;
+        }
         x_new = x+dx; y_new = y+dy;
 
     }
@@ -197,8 +200,11 @@ class Doodler : public Object
     double dx,dy;
     Doodler(): dx(0), dy(0), sprite(":/images/doodler.png")
     {
+       KEY_A_PRESSED = false;
+       KEY_D_PRESSED = false;
+       KEY_SPACE_PRESSED = false;
        sprite.setMask(sprite.createHeuristicMask());
-       x = 400; y = 300; ddx = 0.4, ddy = 0.06; size = 80;
+       x = 400; y = 900; ddx = 0.4, ddy = 0.06; size = 80;
        dy_fake = 0;
        y_fake = y;
        size_x = sprite.width()/2;
@@ -235,7 +241,7 @@ class Doodler : public Object
                 //std::cout << collides(objects)->id << std::endl;
                 if (dy > 0)
                 {
-                    dy = -5;
+                    dy = -4;
                     std::cout << "Jump" << std::endl;
                 }
                 std::cout << "Green Plank" << std::endl;
@@ -246,7 +252,7 @@ class Doodler : public Object
                 //std::cout << collides(objects)->id << std::endl;
                 if (dy > 0)
                 {
-                    dy = -5;
+                    dy = -4;
                     std::cout << "Jump" << std::endl;
                 }
                 std::cout << "Blue Plank" << std::endl;
@@ -261,14 +267,14 @@ class Doodler : public Object
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
         //if (( y < 50 )&&(dy < 0)) y = 749;
-        if (( y >= 750 )&&(dy > 0)) y = 400;
+        if (( y >= 1200 )&&(dy > 0)) {y = 200;}
 
         if (KEY_A_PRESSED) {
-               dx = -6;
+               dx = -4;
                std::cout << "Going left" << std::endl;
         }
         if (KEY_D_PRESSED) {
-            dx =  6;
+            dx =  4;
             std::cout << "Going right" << std::endl;
         }
         if (KEY_SPACE_PRESSED) {
@@ -319,6 +325,12 @@ void Game::keyPressed(int key)
             case Qt::Key_Space:
                 Doodler_ptr->KEY_SPACE_PRESSED = true;
                 break;
+            case Qt::Key_Left:
+                Doodler_ptr->KEY_A_PRESSED = true;
+                break;
+            case Qt::Key_Right:
+                Doodler_ptr->KEY_D_PRESSED = true;
+                break;
 
         }
     }
@@ -337,7 +349,12 @@ void Game::keyReleased(int key)
             case Qt::Key_Space:
                 Doodler_ptr->KEY_SPACE_PRESSED = false;
                 break;
-
+            case Qt::Key_Left:
+                Doodler_ptr->KEY_A_PRESSED = false;
+                break;
+            case Qt::Key_Right:
+                Doodler_ptr->KEY_D_PRESSED = false;
+                break;
         }
     }
 }
@@ -346,9 +363,14 @@ Game::Game()
 {
     Doodler_ptr = new Doodler;
     objects.insert(Doodler_ptr);
-    objects.insert(new Plank_Green(150,700));
-    objects.insert(new Plank_Blue(150));
-    objects.insert(new Plank_Green(400,400));
+    objects.insert(new Plank_Green(300,500));
+    //objects.insert(new Plank_Blue(150));
+    objects.insert(new Plank_Green(200,700));
+    objects.insert(new Plank_Green(400,1100));
+    for (int i = 0; i < 7; i ++ )
+    {
+        objects.insert(new Plank_Green(rand()%800,i*120+30));
+    }
 }
 
 void Game::Show(QPainter& p)
@@ -358,10 +380,10 @@ void Game::Show(QPainter& p)
     double delta = 0;
     if((Doodler_ptr)->y <= Line ) {
         //const Doodler* doodler = static_cast<const Doodler*>(*it);
+        //(Doodler_ptr)->y = Line;
         translatePlanks = true;
         //dood_dy = Line - Doodler_ptr->y_fake;
         delta = Line - Doodler_ptr->y_fake;
-        //objects.push_back(new Plank_Green(400,400));
      }
     else translatePlanks = false;
 
