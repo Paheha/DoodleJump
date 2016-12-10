@@ -25,7 +25,7 @@ class GameView : public QWidget
 
 void GameView::timerEvent(QTimerEvent*)
 {
-        the_game.Next(10);
+        the_game.Next();
         update();
 }
 

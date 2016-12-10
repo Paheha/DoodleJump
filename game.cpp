@@ -13,29 +13,8 @@ using namespace std;
 
 double Line = 200;
 
-class Plank_Green ;
-
-double Object::distance(const Object& other) const
-{
-
-
-    double delta_x = other.x - x;
-    double delta_y = other.y - y;
-    return sqrt(delta_x*delta_x + delta_y*delta_y);
-}
-
 Object* Object::collides(ObjSet& objects) const
 {
-    /*
-    for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
-    {
-        if(*it == this) continue;
-        if (distance(**it) < (size+(*it)->size)) {
-                cout<<"Distance = "<<distance(**it)<<endl;
-                return *it;
-        }
-    } */
-
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
         if(*it == this) continue;
@@ -50,108 +29,76 @@ Object* Object::collides(ObjSet& objects) const
        QRect Other(x2,y2,((*it)->size_x)*2,((*it)->size_y)*2);
 
        if(This.intersects(Other))
-
         {
                 cout<<"COLLISION!!! "<<endl;
                 return *it;
         }
     }
-
-
-
     return 0;
 }
 
-void Game::Next(double dt)
+void Game::Next()
 {
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->Next(objects, dt);
+        (*it)->Next(objects);
 
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->Commit(objects);
+        (*it)->Commit();
 }
 
-//====== Objects
-
-class Plank_Green : public Object
-{
-
+class Plank_Green : public Object{
     double x_new, y_new;
-    static QImage sprite;
-
+    QPixmap sprite;
     public:
 
-
-    Plank_Green(int X,int Y)
-    {
+    Plank_Green(int X,int Y): sprite(":/images/planks/normal.png"){
         size_x = sprite.width()/2;
         size_y = sprite.height()/2;
         cout<<size_x<<", "<<size_y<<endl;
-        size = 10;
         id = 1;
         x = X;
         y = Y;
-        dx = 0;//rand() % 20 - 10 ;
-        dy = 0;
         Starting_Y = Y;
     }
 
-    ~Plank_Green() {
-
-
-    }
+    ~Plank_Green() {}
 
     enum {Type = 10};
     virtual int type() const {return Type;}
 
-
-    void Show(QPainter& p)
-    {
+    void Show(QPainter& p){
         p.save();
-
         p.translate(x,y);
-        p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
-
+        p.drawPixmap(-sprite.width()/2,-sprite.height()/2,sprite);
         p.restore();
     }
 
-    void Next(ObjSet& objects, double dt)
-    {
-
+    void Next(ObjSet& objects){
         if ( y >= 1100 ) {
             y = 200 ;
             x = rand()%600 + 100;
             Starting_Y = 200;
         }
         x_new = x+dx; y_new = y+dy;
-
     }
 
-    void Commit(ObjSet& objects)
-    {
+    void Commit(){
         x = x_new; y = y_new;
     }
 };
 
-
-QImage Plank_Green::sprite(":/images/planks/normal.png");
-
-class Plank_Blue : public Object
-{
+class Plank_Blue : public Object{
     double dx,dy;
     double x_new, y_new;
     static QImage sprite;
     public:
 
-    Plank_Blue(int Y)
-    {
-        size = 50;
+    Plank_Blue(int Y){
         id = 2;
         y = Y;
         x = 400;//rand()% 700 + 50;
         dy = 0;
         dx = 5;
-
     }
     double Starting_Y;
     enum {Type = 11};
@@ -160,14 +107,12 @@ class Plank_Blue : public Object
     void Show(QPainter& p)
     {
         p.save();
-
         p.translate(x,y);
         p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
-
         p.restore();
     }
 
-    void Next(ObjSet& objects, double dt)
+    void Next(ObjSet& objects)
     {
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
@@ -177,8 +122,7 @@ class Plank_Blue : public Object
 
     }
 
-    void Commit(ObjSet& objects)
-    {
+    void Commit(){
         x = x_new; y = y_new;
     }
 };
@@ -192,24 +136,21 @@ class Doodler : public Object
     QPixmap sprite;
 
     public:
-
     bool KEY_A_PRESSED,KEY_D_PRESSED, KEY_SPACE_PRESSED;
     double y_fake, dy_fake;
     enum {Type = 1};
     virtual int type() const {return Type;}
-    double dx,dy;
-    Doodler(): dx(0), dy(0), sprite(":/images/doodler.png")
-    {
+    double dx = 0 , dy = 0;
+    Doodler(): sprite(":/images/doodler.png"){
        KEY_A_PRESSED = false;
        KEY_D_PRESSED = false;
        KEY_SPACE_PRESSED = false;
        sprite.setMask(sprite.createHeuristicMask());
-       x = 400; y = 900; ddx = 0.4, ddy = 0.06; size = 80;
+       x = 400; y = 900; ddx = 0.4, ddy = 0.06;
        dy_fake = 0;
        y_fake = y;
        size_x = sprite.width()/2;
        size_y = sprite.height()/2;
-
        cout<<size_x<<", "<<size_y<<endl;
     }
 
@@ -223,41 +164,30 @@ class Doodler : public Object
         p.restore();
     }
 
-    void do_command(int key)
-    {
-    }
-
-    void Next(ObjSet& objects, double dt)
+    void Next(ObjSet& objects)
     {
         if (Object* Obj_c = collides(objects)) {
-
             std::cout << Obj_c->id << std::endl;
-
-            switch(Obj_c->id)
-            {
-            case 1:
-            {
-                cout<< rand()<<endl;
-                //std::cout << collides(objects)->id << std::endl;
-                if (dy > 0)
-                {
-                    dy = -4;
-                    std::cout << "Jump" << std::endl;
+            switch(Obj_c->id){
+                case 1:{
+                    cout<< rand()<<endl;
+                    if (dy > 0)
+                    {
+                        dy = -4;
+                        std::cout << "Jump" << std::endl;
+                    }
+                    std::cout << "Green Plank" << std::endl;
+                    break;
                 }
-                std::cout << "Green Plank" << std::endl;
-                break;
-            }
-            case 2:
-            {
-                //std::cout << collides(objects)->id << std::endl;
-                if (dy > 0)
-                {
-                    dy = -4;
-                    std::cout << "Jump" << std::endl;
+                case 2:{
+                    if (dy > 0)
+                    {
+                        dy = -4;
+                        std::cout << "Jump" << std::endl;
+                    }
+                    std::cout << "Blue Plank" << std::endl;
+                    break;
                 }
-                std::cout << "Blue Plank" << std::endl;
-                break;
-            }
             }
         }
 
@@ -266,7 +196,6 @@ class Doodler : public Object
         if (abs(dx)<0.4) dx = 0;
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
-        //if (( y < 50 )&&(dy < 0)) y = 749;
         if (( y >= 1200 )&&(dy > 0)) {y = 200;}
 
         if (KEY_A_PRESSED) {
@@ -281,42 +210,31 @@ class Doodler : public Object
             x = 400; y = 400;
             std::cout << "Stopping" << std::endl;
         }
-
         if ( y_fake < 200 ) {
             dy = dy_fake;
-
             dy_fake = dy_fake + ddy;
             y_fake = y_fake + dy_fake;
-
-            //cout<<" y_f= "<<y_fake<<" y= "<<y<<endl;
         }
-        else
-        {
+        else {
             dy_fake = dy;
             y_fake = y;
-            //cout<<" y_f= "<<y_fake<<" y= "<<y<<endl;
             y_new = y + dy;
         }
         dy = dy + ddy;
         x_new = x+dx;
-
     }
 
-    void Commit(ObjSet& objects)
-    {
+    void Commit(){
         x = x_new; y = y_new;
     }
 
 };
 
-//=========
-
 void Game::keyPressed(int key)
 {
     if(Doodler_ptr) {
-        switch(key)
-        {
-            case Qt::Key_A:
+        switch(key) {
+            case (Qt::Key_A):
                 Doodler_ptr->KEY_A_PRESSED = true;
                 break;
             case Qt::Key_D:
@@ -331,7 +249,6 @@ void Game::keyPressed(int key)
             case Qt::Key_Right:
                 Doodler_ptr->KEY_D_PRESSED = true;
                 break;
-
         }
     }
 }
@@ -364,27 +281,21 @@ Game::Game()
     Doodler_ptr = new Doodler;
     objects.insert(Doodler_ptr);
     objects.insert(new Plank_Green(300,500));
-    //objects.insert(new Plank_Blue(150));
     objects.insert(new Plank_Green(200,700));
     objects.insert(new Plank_Green(400,1100));
-    for (int i = 0; i < 7; i ++ )
-    {
+    for (int i = 0; i < 7; i++) {
         objects.insert(new Plank_Green(rand()%800,i*120+30));
     }
 }
 
 void Game::Show(QPainter& p)
 {
-
     bool translatePlanks = false;
     double delta = 0;
     if((Doodler_ptr)->y <= Line ) {
-        //const Doodler* doodler = static_cast<const Doodler*>(*it);
-        //(Doodler_ptr)->y = Line;
         translatePlanks = true;
-        //dood_dy = Line - Doodler_ptr->y_fake;
         delta = Line - Doodler_ptr->y_fake;
-     }
+    }
     else translatePlanks = false;
 
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it) {
@@ -404,6 +315,4 @@ void Game::Show(QPainter& p)
         //cout<<"Greens : "<<Greens<<endl;
         //cout<<"Blues : "<<Blues<<endl;
     }
-
-
 }
