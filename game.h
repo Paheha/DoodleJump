@@ -25,7 +25,7 @@ class Object{
     virtual void Commit() = 0;
     Object* collides(ObjSet& objects) const;
     void translate(double delta) {
-        y = Starting_Y + delta;
+        y -= delta;
     }
 };
 

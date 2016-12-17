@@ -11,7 +11,7 @@
 #include <string>
 using namespace std;
 
-double Line = 200;
+double Line = 300;
 
 Object* Object::collides(ObjSet& objects) const
 {
@@ -56,6 +56,7 @@ class Plank_Green : public Object{
         size_y = sprite.height()/2;
         cout<<size_x<<", "<<size_y<<endl;
         id = 1;
+        dx = 0; dy = 0;
         x = X;
         y = Y;
         Starting_Y = Y;
@@ -74,10 +75,10 @@ class Plank_Green : public Object{
     }
 
     void Next(ObjSet& objects){
-        if ( y >= 1100 ) {
-            y = 200 ;
-            x = rand()%600 + 100;
-            Starting_Y = 200;
+        if (y >= 800) {
+            y = 50;
+            x = rand()%800;
+
         }
         x_new = x+dx; y_new = y+dy;
     }
@@ -136,21 +137,19 @@ class Doodler : public Object
     QPixmap sprite;
 
     public:
+    double dx, dy;
     bool KEY_A_PRESSED,KEY_D_PRESSED, KEY_SPACE_PRESSED;
-    double y_fake, dy_fake;
     enum {Type = 1};
     virtual int type() const {return Type;}
-    double dx = 0 , dy = 0;
     Doodler(): sprite(":/images/doodler.png"){
        KEY_A_PRESSED = false;
        KEY_D_PRESSED = false;
        KEY_SPACE_PRESSED = false;
        sprite.setMask(sprite.createHeuristicMask());
-       x = 400; y = 900; ddx = 0.4, ddy = 0.06;
-       dy_fake = 0;
-       y_fake = y;
+       x = 400; y = 400; ddx = 0.4, ddy = 0.06;
+       dx = 0; dy = 0;
        size_x = sprite.width()/2;
-       size_y = sprite.height()/2;
+       size_y = sprite.height()/8;
        cout<<size_x<<", "<<size_y<<endl;
     }
 
@@ -158,7 +157,7 @@ class Doodler : public Object
     {
         p.save();
         p.translate(x,y);
-        p.drawPixmap(-sprite.width()/2,-sprite.height()/2,sprite);
+        p.drawPixmap(-sprite.width()/2,-sprite.height()*7/8,sprite);
         p.drawText( QPoint(40,-40), "x = " + QString::number(x));
         p.drawText( QPoint(40,-30), "y = " + QString::number(y));
         p.restore();
@@ -173,7 +172,7 @@ class Doodler : public Object
                     cout<< rand()<<endl;
                     if (dy > 0)
                     {
-                        dy = -4;
+                        dy = -5;
                         std::cout << "Jump" << std::endl;
                     }
                     std::cout << "Green Plank" << std::endl;
@@ -182,7 +181,7 @@ class Doodler : public Object
                 case 2:{
                     if (dy > 0)
                     {
-                        dy = -4;
+                        dy = -5;
                         std::cout << "Jump" << std::endl;
                     }
                     std::cout << "Blue Plank" << std::endl;
@@ -193,10 +192,12 @@ class Doodler : public Object
 
         if (dx > 0 ) { dx = dx - ddx ;}
         if (dx < 0 ) { dx = dx + ddx ;}
+
         if (abs(dx)<0.4) dx = 0;
+
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
-        if (( y >= 1200 )&&(dy > 0)) {y = 200;}
+        if (( y >= 750 )&&(dy > 0)) {y = Line;}
 
         if (KEY_A_PRESSED) {
                dx = -4;
@@ -210,18 +211,13 @@ class Doodler : public Object
             x = 400; y = 400;
             std::cout << "Stopping" << std::endl;
         }
-        if ( y_fake < 200 ) {
-            dy = dy_fake;
-            dy_fake = dy_fake + ddy;
-            y_fake = y_fake + dy_fake;
-        }
-        else {
-            dy_fake = dy;
-            y_fake = y;
-            y_new = y + dy;
-        }
         dy = dy + ddy;
+        if (( y <= Line)&&(dy < 0)) {
+            y = Line;
+        }
+        else y_new = y + dy;
         x_new = x+dx;
+
     }
 
     void Commit(){
@@ -280,11 +276,9 @@ Game::Game()
 {
     Doodler_ptr = new Doodler;
     objects.insert(Doodler_ptr);
-    objects.insert(new Plank_Green(300,500));
-    objects.insert(new Plank_Green(200,700));
-    objects.insert(new Plank_Green(400,1100));
-    for (int i = 0; i < 7; i++) {
-        objects.insert(new Plank_Green(rand()%800,i*120+30));
+
+    for (int i = 1; i < 10; i++) {
+        objects.insert(new Plank_Green(rand()%700 + 50,i*100));
     }
 }
 
@@ -294,7 +288,7 @@ void Game::Show(QPainter& p)
     double delta = 0;
     if((Doodler_ptr)->y <= Line ) {
         translatePlanks = true;
-        delta = Line - Doodler_ptr->y_fake;
+        delta = Doodler_ptr->dy;
     }
     else translatePlanks = false;
 

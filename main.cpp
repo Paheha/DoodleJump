@@ -14,7 +14,7 @@ class GameView : public QWidget
         public:
         GameView():QWidget(0)
         {
-                setFixedSize(800,1200);
+                setFixedSize(800,800);
                 startTimer(10);
         }
         void timerEvent(QTimerEvent*);
@@ -32,7 +32,7 @@ void GameView::timerEvent(QTimerEvent*)
 void GameView::paintEvent(QPaintEvent*)
 {
         QPainter p(this);
-        for (int i = 0; i<= 1200; i+=100) {
+        for (int i = 0; i<= 800; i+=100) {
             p.drawText( QPoint(10,i+10),QString::number(i));
             p.drawLine(0,i,800,i);
         }
