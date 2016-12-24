@@ -30,7 +30,6 @@ class Object{
 };
 
 class Plank_Green;
-class Plank_Blue;
 class Doodler;
 
 class Game
@@ -38,7 +37,6 @@ class Game
     private:
         ObjSet objects;
         Plank_Green* Green_ptr;
-        Plank_Blue* Blue_ptr;
         Doodler* Doodler_ptr;
     public:
         Game();

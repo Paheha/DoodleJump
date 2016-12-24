@@ -77,7 +77,7 @@ class Plank_Green : public Object{
     void Next(ObjSet& objects){
         if (y >= 800) {
             y = 50;
-            x = rand()%800;
+            x = rand()%700 + 50 ;
 
         }
         x_new = x+dx; y_new = y+dy;
@@ -88,48 +88,6 @@ class Plank_Green : public Object{
     }
 };
 
-class Plank_Blue : public Object{
-    double dx,dy;
-    double x_new, y_new;
-    static QImage sprite;
-    public:
-
-    Plank_Blue(int Y){
-        id = 2;
-        y = Y;
-        x = 400;//rand()% 700 + 50;
-        dy = 0;
-        dx = 5;
-    }
-    double Starting_Y;
-    enum {Type = 11};
-    virtual int type() const {return Type;}
-
-    void Show(QPainter& p)
-    {
-        p.save();
-        p.translate(x,y);
-        p.drawImage(-sprite.width()/2,-sprite.height()/2,sprite);
-        p.restore();
-    }
-
-    void Next(ObjSet& objects)
-    {
-        if (( x >= 750 )&&(dx > 0)) x = 51;
-        if (( x <= 50 )&&(dx < 0)) x = 749;
-        x_new = x+dx;
-        dy = dy + 0.06;
-        y_new =y +  5* sin(dy);
-
-    }
-
-    void Commit(){
-        x = x_new; y = y_new;
-    }
-};
-
-QImage Plank_Blue::sprite(":/images/planks/blue.png");
-
 class Doodler : public Object
 {
     double ddx, ddy;
@@ -137,27 +95,31 @@ class Doodler : public Object
     QPixmap sprite;
 
     public:
+    double score;
     double dx, dy;
     bool KEY_A_PRESSED,KEY_D_PRESSED, KEY_SPACE_PRESSED;
     enum {Type = 1};
     virtual int type() const {return Type;}
     Doodler(): sprite(":/images/doodler.png"){
-       KEY_A_PRESSED = false;
-       KEY_D_PRESSED = false;
-       KEY_SPACE_PRESSED = false;
-       sprite.setMask(sprite.createHeuristicMask());
-       x = 400; y = 400; ddx = 0.4, ddy = 0.06;
-       dx = 0; dy = 0;
-       size_x = sprite.width()/2;
-       size_y = sprite.height()/8;
-       cout<<size_x<<", "<<size_y<<endl;
+        score = 0;
+        KEY_A_PRESSED = false;
+        KEY_D_PRESSED = false;
+        KEY_SPACE_PRESSED = false;
+        sprite.setMask(sprite.createHeuristicMask());
+        x = 400; y = 400; ddx = 0.4, ddy = 0.09;
+        dx = 0; dy = 0;
+        size_x = sprite.width()/2;
+        size_y = sprite.height()/8;
+        cout<<size_x<<", "<<size_y<<endl;
     }
 
     void Show(QPainter& p)
     {
         p.save();
+        p.drawText( QPoint(700,20),"Score " + QString::number(score));
         p.translate(x,y);
         p.drawPixmap(-sprite.width()/2,-sprite.height()*7/8,sprite);
+
         p.drawText( QPoint(40,-40), "x = " + QString::number(x));
         p.drawText( QPoint(40,-30), "y = " + QString::number(y));
         p.restore();
@@ -172,21 +134,13 @@ class Doodler : public Object
                     cout<< rand()<<endl;
                     if (dy > 0)
                     {
-                        dy = -5;
+                        dy = -6;
                         std::cout << "Jump" << std::endl;
                     }
                     std::cout << "Green Plank" << std::endl;
                     break;
                 }
-                case 2:{
-                    if (dy > 0)
-                    {
-                        dy = -5;
-                        std::cout << "Jump" << std::endl;
-                    }
-                    std::cout << "Blue Plank" << std::endl;
-                    break;
-                }
+
             }
         }
 
@@ -213,9 +167,11 @@ class Doodler : public Object
         }
         dy = dy + ddy;
         if (( y <= Line)&&(dy < 0)) {
+            score -= dy;
             y = Line;
         }
         else y_new = y + dy;
+
         x_new = x+dx;
 
     }
@@ -277,8 +233,8 @@ Game::Game()
     Doodler_ptr = new Doodler;
     objects.insert(Doodler_ptr);
 
-    for (int i = 1; i < 10; i++) {
-        objects.insert(new Plank_Green(rand()%700 + 50,i*100));
+    for (int i = 1; i < 8; i++) {
+        objects.insert(new Plank_Green(rand()%700 + 50,i*90));
     }
 }
 
@@ -299,14 +255,5 @@ void Game::Show(QPainter& p)
         else (*it)->dy = 0;
 
         (*it)->Show(p);
-    }
-
-    for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it) {
-        int Greens = 0;
-        int Blues = 0;
-        if ((*it)->type() == Plank_Green::Type) {Greens++;}
-        if ((*it)->type() == Plank_Blue::Type) {Blues++;}
-        //cout<<"Greens : "<<Greens<<endl;
-        //cout<<"Blues : "<<Blues<<endl;
     }
 }
