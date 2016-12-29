@@ -18,17 +18,15 @@ Object* Object::collides(ObjSet& objects) const
     for(ObjSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
         if(*it == this) continue;
-        double x1 = x - size_x; // Координата х верхнего края этого объекта
-        double y1 = y - size_y; // Координата y левого края этого объекта
-        double x2 = (*it)->x - (*it)->size_x; // Координата х верхнего края другого объекта
-        double y2 = (*it)->y - (*it)->size_y; // Координата y левого края другого объекта
+        double x1 = x - size_x;
+        double y1 = y - size_y;
+        double x2 = (*it)->x - (*it)->size_x;
+        double y2 = (*it)->y - (*it)->size_y;
 
+        QRect This(x1,y1,size_x*2,size_y*2);
+        QRect Other(x2,y2,((*it)->size_x)*2,((*it)->size_y)*2);
 
-
-       QRect This(x1,y1,size_x*2,size_y*2);
-       QRect Other(x2,y2,((*it)->size_x)*2,((*it)->size_y)*2);
-
-       if(This.intersects(Other))
+        if(This.intersects(Other))
         {
                 cout<<"COLLISION!!! "<<endl;
                 return *it;
@@ -78,7 +76,6 @@ class Plank_Green : public Object{
         if (y >= 800) {
             y = 50;
             x = rand()%700 + 50 ;
-
         }
         x_new = x+dx; y_new = y+dy;
     }
@@ -97,14 +94,15 @@ class Doodler : public Object
     public:
     double score;
     double dx, dy;
-    bool KEY_A_PRESSED,KEY_D_PRESSED, KEY_SPACE_PRESSED;
+    bool Loose;
+    bool KEY_A_PRESSED,KEY_D_PRESSED;
     enum {Type = 1};
     virtual int type() const {return Type;}
     Doodler(): sprite(":/images/doodler.png"){
         score = 0;
+        Loose = false;
         KEY_A_PRESSED = false;
         KEY_D_PRESSED = false;
-        KEY_SPACE_PRESSED = false;
         sprite.setMask(sprite.createHeuristicMask());
         x = 400; y = 400; ddx = 0.4, ddy = 0.09;
         dx = 0; dy = 0;
@@ -117,11 +115,14 @@ class Doodler : public Object
     {
         p.save();
         p.drawText( QPoint(700,20),"Score " + QString::number(score));
+
+        if (Loose){
+            p.drawText( QPoint(350,400),"YOU LOOSE");
+            p.drawText( QPoint(350,420),"Your score: " + QString::number(score));
+
+        }
         p.translate(x,y);
         p.drawPixmap(-sprite.width()/2,-sprite.height()*7/8,sprite);
-
-        p.drawText( QPoint(40,-40), "x = " + QString::number(x));
-        p.drawText( QPoint(40,-30), "y = " + QString::number(y));
         p.restore();
     }
 
@@ -131,7 +132,6 @@ class Doodler : public Object
             std::cout << Obj_c->id << std::endl;
             switch(Obj_c->id){
                 case 1:{
-                    cout<< rand()<<endl;
                     if (dy > 0)
                     {
                         dy = -6;
@@ -151,7 +151,7 @@ class Doodler : public Object
 
         if (( x >= 750 )&&(dx > 0)) x = 51;
         if (( x <= 50 )&&(dx < 0)) x = 749;
-        if (( y >= 750 )&&(dy > 0)) {y = Line;}
+        if ( y >= 850 ) {Loose = true;}
 
         if (KEY_A_PRESSED) {
                dx = -4;
@@ -161,10 +161,7 @@ class Doodler : public Object
             dx =  4;
             std::cout << "Going right" << std::endl;
         }
-        if (KEY_SPACE_PRESSED) {
-            x = 400; y = 400;
-            std::cout << "Stopping" << std::endl;
-        }
+
         dy = dy + ddy;
         if (( y <= Line)&&(dy < 0)) {
             score -= dy;
@@ -192,9 +189,6 @@ void Game::keyPressed(int key)
             case Qt::Key_D:
                 Doodler_ptr->KEY_D_PRESSED = true;
                 break;
-            case Qt::Key_Space:
-                Doodler_ptr->KEY_SPACE_PRESSED = true;
-                break;
             case Qt::Key_Left:
                 Doodler_ptr->KEY_A_PRESSED = true;
                 break;
@@ -214,9 +208,6 @@ void Game::keyReleased(int key)
                 break;
             case Qt::Key_D:
                 Doodler_ptr->KEY_D_PRESSED = false;
-                break;
-            case Qt::Key_Space:
-                Doodler_ptr->KEY_SPACE_PRESSED = false;
                 break;
             case Qt::Key_Left:
                 Doodler_ptr->KEY_A_PRESSED = false;

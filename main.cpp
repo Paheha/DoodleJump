@@ -34,11 +34,10 @@ void GameView::paintEvent(QPaintEvent*)
         QPainter p(this);
         for (int i = 0; i<= 800; i+=100) {
             p.drawText( QPoint(10,i+10),QString::number(i));
-            p.drawLine(0,i,800,i);
+            p.drawLine(0,i,80,i);
         }
         the_game.Show(p);
 }
-
 
 void GameView::keyPressEvent(QKeyEvent* e)
 {
@@ -55,15 +54,8 @@ int main(int ac, char* av[])
         QApplication a(ac,av);
         QResource::registerResource("myresource.rcc");
         GameView gv; gv.show();
-       /* QBrush br(Qt::TexturePattern);
-            br.setTextureImage(QImage(":/images/backgr.png"));
-            QPalette plt = gv.palette();
-            plt.setBrush(QPalette::Background, br);
-            gv.setPalette(plt);
-            gv.show(); */
         QObject::connect(
                         &a,SIGNAL(lastWindowClosed()),
                         &a,SLOT(quit()));
-
         return a.exec();
 }

@@ -46,5 +46,4 @@ class Game
         void keyReleased(int key);
 };
 
-
 #endif
